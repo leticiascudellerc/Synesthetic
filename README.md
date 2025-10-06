@@ -37,21 +37,6 @@ This project was designed, coded, and deployed by **Letícia Scudeller**, a BUCS
 - **Runtime:** Node.js 20
 
 ---
-
-## 📁 Project Structure
-src/
-├─ app/
-│   ├─ components/
-│   │   ├─ MoodGenrePicker.tsx     → main interactive UI
-│   │   └─ MoodBackground.tsx      → background video / gradient per mood
-│   ├─ api/
-│   │   └─ playlist/route.ts       → Spotify API handler (serverless)
-│   ├─ layout.tsx                  → global fonts and page shell
-│   └─ page.tsx                    → main landing page
-└─ lib/
-└─ theme.ts                    → defines mood & genre color palettes
----
-
 ## 🧠 Technical Highlights
 
 - Token caching in memory to minimize Spotify API calls  
