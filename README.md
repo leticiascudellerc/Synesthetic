@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎧 Synesthetic
 
-## Getting Started
+**Synesthetic** is a mood-driven music discovery app that merges **emotion, color, and sound**.  
+Pick how you feel — and your favorite genre — and the interface transforms in real-time while curated Spotify playlists appear to match your vibe.
 
-First, run the development server:
+🌐 **Live Demo:** [synesthetic.vercel.app](https://synesthetic.vercel.app)
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🪄 Overview
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Synesthetic bridges art and data through an interactive experience that visualizes sound.  
+It uses the **Spotify Web API** to fetch playlists that align with a user’s selected *mood* and *genre*, dynamically adapting the UI colors and background animations to reflect that energy.  
+Every playlist expands to preview tracks — blending emotional design with practical data querying.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This project was designed, coded, and deployed by **Letícia Scudeller**, a BUCS (Business + Computer Science) student at UBC passionate about creative tech and AI-powered interfaces.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Features
 
-## Learn More
+| Feature | Description |
+|----------|-------------|
+| 🎨 **Mood & Genre Picker** | Choose a mood and a music genre; the interface color palette shifts instantly. |
+| 🎧 **Spotify Integration** | Fetches matching playlists using Spotify’s `/search` and `/categories` endpoints. |
+| ⚡ **Serverless API** | Cached Spotify tokens via Vercel’s Edge Runtime for fast performance. |
+| 🌈 **Dynamic Backgrounds** | Seamless looping videos and gradients visualize each mood. |
+| 💽 **Deployed on Vercel** | Continuous deployment and auto-builds from GitHub. |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🧰 Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Framework:** Next.js 15 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **API:** Spotify Web API
+- **Deployment:** Vercel Serverless Functions
+- **Runtime:** Node.js 20
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📁 Project Structure
+src/
+├─ app/
+│   ├─ components/
+│   │   ├─ MoodGenrePicker.tsx     → main interactive UI
+│   │   └─ MoodBackground.tsx      → background video / gradient per mood
+│   ├─ api/
+│   │   └─ playlist/route.ts       → Spotify API handler (serverless)
+│   ├─ layout.tsx                  → global fonts and page shell
+│   └─ page.tsx                    → main landing page
+└─ lib/
+└─ theme.ts                    → defines mood & genre color palettes
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🧠 Technical Highlights
+
+- Token caching in memory to minimize Spotify API calls  
+- Deduplication and sorting of playlist results by track count  
+- Graceful handling of Spotify API errors  
+- Progressive loading skeletons for improved UX  
+- Fully typed React components (`MoodKey`, `GenreKey` enums)  
+- Modular architecture (frontend + serverless backend in one codebase)
+
+---
+👩🏻‍💻 About the Developer
+Letícia Scudeller Carvalho
+🌐 LinkedIn: https://www.linkedin.com/in/leticiascudeller/
