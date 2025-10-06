@@ -1,5 +1,7 @@
 # 🎧 Synesthetic
 
+<img width="1511" height="851" alt="Screenshot 2025-10-06 at 1 14 16 AM" src="https://github.com/user-attachments/assets/9323d877-2da6-4ebc-b1a0-65e776be1625" />
+
 **Synesthetic** is a mood-driven music discovery app that merges **emotion, color, and sound**.  
 Pick how you feel — and your favorite genre — and the interface transforms in real-time while curated Spotify playlists appear to match your vibe.
 
