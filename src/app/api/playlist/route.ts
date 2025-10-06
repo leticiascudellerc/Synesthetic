@@ -4,30 +4,45 @@ export const runtime = "nodejs";
 /** --- defaults/config --- */
 const DEFAULT_MARKET = "US";
 const DEFAULT_LIMIT = 20;
-const MAX_PLAYLISTS = 30; // busca um pouco mais e filtra/ordena depois
+const MAX_PLAYLISTS = 30;
 
-// cache simples de token (memória do processo)
+// cache simples de token
 let CACHED_TOKEN: { value: string; expiresAt: number } | null = null;
 
 const MOOD_MAP: Record<string, { keywords: string[]; categoryId?: string }> = {
-  calm:       { keywords: ["calm", "chill", "acoustic", "relax"], categoryId: "chill" },
-  happy:      { keywords: ["happy", "feel good", "good vibes"],    categoryId: "mood" },
-  sad:        { keywords: ["sad", "melancholy", "rainy day"],      categoryId: "mood" },
-  energetic:  { keywords: ["workout", "power", "hype", "energy"],  categoryId: "workout" },
-  focused:    { keywords: ["focus", "deep focus", "lofi", "study"],categoryId: "focus" },
-  romantic:   { keywords: ["romantic", "love", "date night"],      categoryId: "mood" },
+  calm:      { keywords: ["calm", "chill", "acoustic", "relax"], categoryId: "chill" },
+  happy:     { keywords: ["happy", "feel good", "good vibes"],   categoryId: "mood" },
+  sad:       { keywords: ["sad", "melancholy", "rainy day"],     categoryId: "mood" },
+  energetic: { keywords: ["workout", "power", "hype", "energy"], categoryId: "workout" },
+  focused:   { keywords: ["focus", "deep focus", "lofi", "study"], categoryId: "focus" },
+  romantic:  { keywords: ["romantic", "love", "date night"],     categoryId: "mood" },
 };
+
+// 🔧 remove aspas, quebras de linha e espaços invisíveis
+function cleanEnv(v?: string | null) {
+  return (v ?? "")
+    .replace(/^\s+|\s+$/g, "")       // trim
+    .replace(/^[\'\"]|[\'\"]$/g, "") // tira aspas nas pontas
+    .replace(/\r?\n/g, "");          // tira newlines
+}
 
 async function getToken(): Promise<string> {
   const now = Date.now();
   if (CACHED_TOKEN && CACHED_TOKEN.expiresAt > now + 5000) {
     return CACHED_TOKEN.value;
   }
-  const client_id = process.env.SPOTIFY_CLIENT_ID;
-  const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-  if (!client_id || !client_secret) throw new Error("Missing Spotify credentials");
 
-  const basic = Buffer.from(`${client_id}:${client_secret}`).toString("base64");
+  const rawId = cleanEnv(process.env.SPOTIFY_CLIENT_ID);
+  const rawSecret = cleanEnv(process.env.SPOTIFY_CLIENT_SECRET);
+
+  if (!rawId || !rawSecret) {
+    throw new Error(
+      `Missing Spotify credentials (idLen=${rawId.length}, secretLen=${rawSecret.length})`
+    );
+  }
+
+  const basic = Buffer.from(`${rawId}:${rawSecret}`, "utf8").toString("base64");
+
   const res = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: {
@@ -39,9 +54,15 @@ async function getToken(): Promise<string> {
   });
 
   const text = await res.text();
-  if (!res.ok) throw new Error(`Spotify token error: ${res.status} → ${text}`);
+  if (!res.ok) {
+    // devolve diagnóstico suficiente pra detectar aspas/newline/ambiente errado
+    throw new Error(
+      `Spotify token error: ${res.status} → ${text} ` +
+      `(diag: idLen=${rawId.length}, secretLen=${rawSecret.length}, basicPrefix=${basic.slice(0,12)})`
+    );
+  }
+
   const data = JSON.parse(text);
-  // guarda por ~55min (expires_in é 3600s)
   CACHED_TOKEN = { value: data.access_token, expiresAt: now + 55 * 60 * 1000 };
   return data.access_token as string;
 }
@@ -49,13 +70,11 @@ async function getToken(): Promise<string> {
 function buildPlaylistQuery(mood?: string | null, genre?: string | null) {
   const moodKey = (mood ?? "").toLowerCase();
   const genreKey = (genre ?? "").toLowerCase();
-
   const moodBits = MOOD_MAP[moodKey]?.keywords ?? [];
   const parts: string[] = [];
   if (genreKey) parts.push(genreKey);
   if (moodBits.length) parts.push(...moodBits);
   parts.push("playlist", "mix");
-
   const q = Array.from(new Set(parts.filter(Boolean))).join(" ");
   return q || "mood mix";
 }
@@ -159,9 +178,8 @@ export async function GET(req: Request) {
       playlists = playlists.concat(byCat);
     }
 
-    // filtra, ordena e deduplica
     playlists = playlists
-      .filter(p => p.tracks_count >= minTracks)
+      .filter((p) => p.tracks_count >= minTracks)
       .sort((a, b) => (b.tracks_count ?? 0) - (a.tracks_count ?? 0));
 
     playlists = dedupeById(playlists).slice(0, limit);
@@ -173,10 +191,20 @@ export async function GET(req: Request) {
           sample_tracks: await fetchPlaylistTracksSample(token, p.id, market, 15),
         }))
       );
-      return NextResponse.json({ ok: true, query: { mood, genre, q, market, limit, minTracks, tracks: true }, count: sampled.length, items: sampled });
+      return NextResponse.json({
+        ok: true,
+        query: { mood, genre, q, market, limit, minTracks, tracks: true },
+        count: sampled.length,
+        items: sampled,
+      });
     }
 
-    return NextResponse.json({ ok: true, query: { mood, genre, q, market, limit, minTracks }, count: playlists.length, items: playlists });
+    return NextResponse.json({
+      ok: true,
+      query: { mood, genre, q, market, limit, minTracks },
+      count: playlists.length,
+      items: playlists,
+    });
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: String(e?.message ?? e) }, { status: 500 });
   }
