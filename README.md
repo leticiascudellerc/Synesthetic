@@ -50,5 +50,5 @@ This project was designed, coded, and deployed by **Letícia Scudeller**, a BUCS
 
 ---
 👩🏻‍💻 About the Developer
-Letícia Scudeller Carvalho
+## Letícia Scudeller Carvalho
 🌐 LinkedIn: https://www.linkedin.com/in/leticiascudeller/
